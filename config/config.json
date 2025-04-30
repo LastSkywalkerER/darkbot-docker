@@ -1,0 +1,10 @@
+{
+  "browser": {
+    "type": "chromium",
+    "path": "/usr/bin/chromium-browser"
+  },
+  "general": {
+    "autoLogin": true,
+    "autoStart": true
+  }
+} 
