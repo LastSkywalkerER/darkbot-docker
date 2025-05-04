@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Set browser environment variables
+# Start Xvfb
 export DISPLAY=:1
 export DBUS_SESSION_BUS_ADDRESS=/dev/null
 
@@ -22,6 +22,14 @@ x11vnc -display :1 -forever -usepw -shared -rfbport 5900 -rfbportv6 -1 -loop -xk
 # Wait for VNC server to start
 sleep 5
 
+# Make AppImage executable
+chmod +x /root/darkbot/lib/backpage-linux-x86_64.AppImage
+# lib/backpage-linux-x86_64.AppImage &
+
+# Check browser
+google-chrome --no-sandbox &
+# google-chrome --headless --no-sandbox --disable-gpu --remote-debugging-port=9222 http://example.com
+
 # Run the jar file
-cd /home/darkbot/darkbot
+cd /root/darkbot
 java -jar DarkBot.jar 

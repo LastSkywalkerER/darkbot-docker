@@ -1,15 +1,19 @@
 FROM ubuntu:22.04
 
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install necessary packages
 RUN apt-get update && apt-get install -y \
     openjdk-17-jdk \
+    wget \
     xvfb \
     x11vnc \
-    xterm \
     fluxbox \
-    net-tools \
-    chromium-browser \
-    chromium-chromedriver \
+    curl \
+    ca-certificates \
+    gnupg2 \
+    libvulkan1 \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
@@ -39,31 +43,40 @@ RUN apt-get update && apt-get install -y \
     libxcb-xinput0 \
     libxcb-xkb1 \
     libxcb-xtest0 \
+    fuse \
+    libfuse2 \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libxss1 \
+    libxtst6 \
+    xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
-RUN useradd -m -s /bin/bash darkbot
+# Set timezone
+RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+
+# Install Google Chrome Stable 
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get install -y ./google-chrome-stable_current_amd64.deb && \
+    rm google-chrome-stable_current_amd64.deb
 
 # Set up VNC password (default: darkbot)
-RUN mkdir -p /home/darkbot/.vnc && \
-    chown -R darkbot:darkbot /home/darkbot/.vnc && \
-    su - darkbot -c "x11vnc -storepasswd darkbot /home/darkbot/.vnc/passwd" && \
-    chown darkbot:darkbot /home/darkbot/.vnc/passwd && \
-    chmod 600 /home/darkbot/.vnc/passwd
+RUN mkdir -p /root/.vnc && \
+    x11vnc -storepasswd darkbot /root/.vnc/passwd && \
+    chmod 600 /root/.vnc/passwd
 
 # Create mount point for config
 RUN mkdir -p /mnt/darkbot/config && \
-    chown -R darkbot:darkbot /mnt/darkbot && \
     chmod 777 /mnt/darkbot/config
+
+# Copy darkbot files
+COPY darkbot /root/darkbot
 
 # Expose VNC port
 EXPOSE 5900
 
 # Copy and set permissions for start script
-COPY scripts/start.sh /home/darkbot/scripts/
-RUN chown darkbot:darkbot /home/darkbot/scripts/start.sh && chmod 755 /home/darkbot/scripts/start.sh
+COPY scripts/start.sh /root/scripts/
+RUN chmod 755 /root/scripts/start.sh
 
-# Switch to non-root user
-USER darkbot
-
-CMD ["/home/darkbot/scripts/start.sh"] 
+CMD ["/root/scripts/start.sh"] 

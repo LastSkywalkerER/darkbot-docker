@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  darkbot:
+    build:
+      context: .
+      dockerfile: Dockerfile.windows
+    container_name: darkbot-windows
+    platform: windows/amd64
+    ports:
+      - "5900:5900"  # VNC port
+    volumes:
+      - ./darkbot:/darkbot  # Mount entire darkbot directory
+    restart: unless-stopped
+    environment:
+      - VNC_PASSWORD=darkbot
+    networks:
+      - darkbot-network
+
+networks:
+  darkbot-network:
+    driver: nat  # Windows containers typically use NAT network driver 

@@ -1,0 +1,34 @@
+# Use Windows Server Core as base image
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
+
+# Install Chocolatey package manager
+RUN powershell -Command Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# Install Java and other required software
+RUN choco install -y openjdk17
+RUN choco install -y tightvnc
+
+# Create directory for darkbot
+RUN mkdir C:\darkbot
+RUN mkdir C:\darkbot\scripts
+
+# Set up VNC password (default: darkbot)
+RUN powershell -Command $password = 'darkbot' | ConvertTo-SecureString -AsPlainText -Force; $credential = New-Object System.Management.Automation.PSCredential('Administrator', $password); $credential.GetNetworkCredential().Password | Out-File -FilePath 'C:\darkbot\vncpasswd.txt' -Encoding ASCII
+
+# Create volume mount point
+VOLUME C:\darkbot
+
+# Expose VNC port
+EXPOSE 5900
+
+# Copy start script
+COPY ["scripts/start.ps1", "C:/darkbot/scripts/"]
+
+# Set execution policy
+RUN powershell -Command Set-ExecutionPolicy Bypass -Scope Process -Force; Unblock-File C:\darkbot\scripts\start.ps1
+
+# Set working directory
+WORKDIR C:\darkbot
+
+# Start VNC server and run darkbot
+CMD ["powershell", "-File", "C:\\darkbot\\scripts\\start.ps1"] 
