@@ -60,23 +60,34 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
     apt-get install -y ./google-chrome-stable_current_amd64.deb && \
     rm google-chrome-stable_current_amd64.deb
 
-# Set up VNC password (default: darkbot)
-RUN mkdir -p /root/.vnc && \
-    x11vnc -storepasswd darkbot /root/.vnc/passwd && \
-    chmod 600 /root/.vnc/passwd
+# Create darkorbit user and set up directories
+RUN useradd -m -s /bin/bash darkorbit && \
+    mkdir -p /home/darkorbit/.vnc && \
+    mkdir -p /home/darkorbit/darkbot && \
+    mkdir -p /home/darkorbit/scripts && \
+    mkdir -p /mnt/darkbot/config && \
+    chown -R darkorbit:darkorbit /home/darkorbit && \
+    chown -R darkorbit:darkorbit /mnt/darkbot/config
 
-# Create mount point for config
-RUN mkdir -p /mnt/darkbot/config && \
-    chmod 777 /mnt/darkbot/config
+# Set up VNC password (default: darkbot)
+RUN x11vnc -storepasswd darkbot /home/darkorbit/.vnc/passwd && \
+    chown darkorbit:darkorbit /home/darkorbit/.vnc/passwd && \
+    chmod 600 /home/darkorbit/.vnc/passwd
 
 # Copy darkbot files
-COPY darkbot /root/darkbot
+COPY darkbot /home/darkorbit/darkbot
+RUN chown -R darkorbit:darkorbit /home/darkorbit/darkbot
 
 # Expose VNC port
 EXPOSE 5900
 
 # Copy and set permissions for start script
-COPY scripts/start.sh /root/scripts/
-RUN chmod 755 /root/scripts/start.sh
+COPY scripts/start.sh /home/darkorbit/scripts/
+RUN chown darkorbit:darkorbit /home/darkorbit/scripts/start.sh && \
+    chmod 755 /home/darkorbit/scripts/start.sh
 
-CMD ["/root/scripts/start.sh"] 
+# Switch to darkorbit user
+USER darkorbit
+WORKDIR /home/darkorbit
+
+CMD ["/home/darkorbit/scripts/start.sh"] 

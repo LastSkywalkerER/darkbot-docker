@@ -23,13 +23,13 @@ x11vnc -display :1 -forever -usepw -shared -rfbport 5900 -rfbportv6 -1 -loop -xk
 sleep 5
 
 # Make AppImage executable
-chmod +x /root/darkbot/lib/backpage-linux-x86_64.AppImage
+chmod +x /home/darkorbit/darkbot/lib/backpage-linux-x86_64.AppImage
 # lib/backpage-linux-x86_64.AppImage &
 
 # Check browser
-google-chrome --no-sandbox &
+# google-chrome --no-sandbox &
 # google-chrome --headless --no-sandbox --disable-gpu --remote-debugging-port=9222 http://example.com
 
 # Run the jar file
-cd /root/darkbot
+cd /home/darkorbit/darkbot
 java -jar DarkBot.jar 
