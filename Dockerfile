@@ -6,7 +6,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install necessary packages
 RUN apt-get update && apt-get install -y \
     openjdk-17-jdk \
+    openjdk-17-jre \
     wget \
+    unzip \
     xvfb \
     x11vnc \
     fluxbox \
